@@ -29,7 +29,6 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "188.166.219.201,localhost").split(",")
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 # Application definition
 
@@ -75,17 +74,20 @@ WSGI_APPLICATION = 'django_app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-             'default': {
-                            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                            'NAME': 'defaultdb',
-                            'USER' : 'doadmin',
-                            'PASSWORD' : 'qwtq2v3cksrvb556',
-                            'HOST' : 'accp-posgres-do-user-9271829-0.b.db.ondigitalocean.com'
-                            'PORT': 25060
-                         }
-             }
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+if DEVELOPMENT_MODE is True:
+        DATABASES = {
+                        "default": {
+                                        "ENGINE": "django.db.backends.sqlite3",
+                                                    "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+                                                            }
+                            }
+    elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+            if os.getenv("DATABASE_URL", None) is None:
+                        raise Exception("DATABASE_URL environment variable not defined")
+                        DATABASES = {
+                                        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+                                            }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
